@@ -1,10 +1,12 @@
 use attributes::{DefineErrorArgs, VariantArg, VariantArgs};
+use codegen::error_definition;
 use names::type_to_variant;
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, Error, Type};
 use types::{CompositeError, Variant};
 
 mod attributes;
+mod codegen;
 mod names;
 mod types;
 
@@ -25,7 +27,7 @@ pub fn define_error(attributes: TokenStream) -> TokenStream {
         composed,
     };
 
-    TokenStream::new()
+    error_definition(error).into()
 }
 
 fn split_variants(args: VariantArgs) -> Result<(Vec<Variant>, Vec<Type>), Error> {
