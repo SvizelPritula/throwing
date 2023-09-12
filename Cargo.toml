@@ -1,0 +1,3 @@
+[workspace]
+members = ["throwing", "throwing-macros"]
+resolver = "2"

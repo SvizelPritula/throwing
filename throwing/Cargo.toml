@@ -1,0 +1,9 @@
+[package]
+name = "throwing"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+
+[dependencies]
+throwing-macros = { version = "0.1.0", path = "../throwing-macros" }
