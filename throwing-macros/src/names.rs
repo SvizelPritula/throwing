@@ -35,3 +35,24 @@ fn path_to_variant(path: &Path) -> Ident {
 
     Ident::new(&name, path.span())
 }
+
+pub fn fn_name_to_error(ident: &Ident) -> Ident {
+    let name = ident.to_string();
+    let segments = name.split('_');
+
+    let mut name = String::new();
+
+    for segment in segments {
+        let mut chars = segment.chars();
+
+        if let Some(c) = chars.next() {
+            name.extend(c.to_uppercase());
+        }
+
+        name.extend(chars);
+    }
+
+    name.push_str("Error");
+
+    Ident::new(&name, ident.span())
+}

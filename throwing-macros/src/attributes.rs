@@ -59,11 +59,44 @@ impl Parse for DefineErrorArgs {
         let equal: Option<Token!(=)> = input.parse()?;
 
         let variants = if equal.is_some() {
-            input.parse_terminated(VariantArg::parse, Token!(|))?
+            Punctuated::parse_terminated(input)?
         } else {
             VariantArgs::default()
         };
 
         Ok(DefineErrorArgs { type_def, variants })
+    }
+}
+
+pub struct ThrowsArgs {
+    pub name: Option<Ident>,
+    pub variants: VariantArgs,
+}
+
+impl Parse for ThrowsArgs {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let type_tok: Option<Token!(type)> = input.parse()?;
+
+        if type_tok.is_some() {
+            let name = input.parse()?;
+
+            let equal: Option<Token!(=)> = input.parse()?;
+
+            let variants = if equal.is_some() {
+                Punctuated::parse_terminated(input)?
+            } else {
+                VariantArgs::default()
+            };
+
+            Ok(ThrowsArgs {
+                name: Some(name),
+                variants,
+            })
+        } else {
+            Ok(ThrowsArgs {
+                name: None,
+                variants: Punctuated::parse_terminated(input)?,
+            })
+        }
     }
 }

@@ -1,7 +1,7 @@
 use crate::types::{CompositeError, Variant};
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::Type;
+use syn::{parse_quote, ItemFn, ReturnType, Type};
 
 fn error_enum(error: &CompositeError) -> TokenStream {
     let CompositeError {
@@ -83,4 +83,21 @@ pub fn error_definition(error: CompositeError) -> TokenStream {
     stream.extend(impl_sub_error(&error));
 
     stream
+}
+
+fn wrap_return_with_result(ret: ReturnType, error: Ident) -> ReturnType {
+    let (arrow, typ) = match ret {
+        ReturnType::Default => (Default::default(), parse_quote!(())),
+        ReturnType::Type(arrow, typ) => (arrow, *typ),
+    };
+
+    let typ = parse_quote!(::std::result::Result<#typ, #error>);
+
+    ReturnType::Type(arrow, Box::new(typ))
+}
+
+pub fn patch_function(mut function: ItemFn, error: Ident) -> ItemFn {
+    function.sig.output = wrap_return_with_result(function.sig.output, error);
+
+    function
 }

@@ -1,8 +1,9 @@
-use attributes::{DefineErrorArgs, VariantArg, VariantArgs};
-use codegen::error_definition;
-use names::type_to_variant;
+use attributes::{DefineErrorArgs, ThrowsArgs, VariantArg, VariantArgs};
+use codegen::{error_definition, patch_function};
+use names::{fn_name_to_error, type_to_variant};
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, Error, Type};
+use quote::ToTokens;
+use syn::{parse_macro_input, Error, Item, Type};
 use types::{CompositeError, Variant};
 
 mod attributes;
@@ -28,6 +29,38 @@ pub fn define_error(attributes: TokenStream) -> TokenStream {
     };
 
     error_definition(error).into()
+}
+
+#[proc_macro_attribute]
+pub fn throws(attributes: TokenStream, body: TokenStream) -> TokenStream {
+    let body = parse_macro_input!(body as Item);
+    let Item::Fn(function) = body else {
+        return Error::new_spanned(body, "the throws macro can only be used on functions")
+            .into_compile_error()
+            .into();
+    };
+
+    let attrs = parse_macro_input!(attributes as ThrowsArgs);
+    let ThrowsArgs { name, variants } = attrs;
+
+    let name = name.unwrap_or_else(|| fn_name_to_error(&function.sig.ident));
+
+    let (variants, composed) = match split_variants(variants) {
+        Ok(v) => v,
+        Err(e) => return e.to_compile_error().into(),
+    };
+
+    let error = CompositeError {
+        name,
+        visibility: function.vis.clone(),
+        variants,
+        composed,
+    };
+
+    let mut stream = patch_function(function, error.name.clone()).to_token_stream();
+    stream.extend(error_definition(error));
+
+    stream.into()
 }
 
 fn split_variants(args: VariantArgs) -> Result<(Vec<Variant>, Vec<Type>), Error> {
