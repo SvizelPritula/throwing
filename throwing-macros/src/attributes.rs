@@ -5,8 +5,8 @@ use syn::{
 };
 
 pub enum VariantArg {
-    Variant { subtype: Type, name: Option<Ident> },
-    Composed { subtype: Type },
+    Variant { typ: Type, name: Option<Ident> },
+    Composed { typ: Type },
 }
 
 impl Parse for VariantArg {
@@ -14,10 +14,10 @@ impl Parse for VariantArg {
         let break_tok: Option<Token!(break)> = input.parse()?;
 
         if break_tok.is_some() {
-            let subtype: Type = input.parse()?;
-            Ok(VariantArg::Composed { subtype })
+            let typ: Type = input.parse()?;
+            Ok(VariantArg::Composed { typ })
         } else {
-            let subtype: Type = input.parse()?;
+            let typ: Type = input.parse()?;
             let as_tok: Option<Token!(as)> = input.parse()?;
 
             let name: Option<Ident> = if as_tok.is_some() {
@@ -26,7 +26,7 @@ impl Parse for VariantArg {
                 None
             };
 
-            Ok(VariantArg::Variant { subtype, name })
+            Ok(VariantArg::Variant { typ, name })
         }
     }
 }
@@ -50,7 +50,7 @@ pub type VariantArgs = Punctuated<VariantArg, Token!(|)>;
 
 pub struct DefineErrorArgs {
     pub type_def: TypeDef,
-    pub variants: Option<VariantArgs>,
+    pub variants: VariantArgs,
 }
 
 impl Parse for DefineErrorArgs {
@@ -59,9 +59,9 @@ impl Parse for DefineErrorArgs {
         let equal: Option<Token!(=)> = input.parse()?;
 
         let variants = if equal.is_some() {
-            Some(input.parse_terminated(VariantArg::parse, Token!(|))?)
+            input.parse_terminated(VariantArg::parse, Token!(|))?
         } else {
-            None
+            VariantArgs::default()
         };
 
         Ok(DefineErrorArgs { type_def, variants })

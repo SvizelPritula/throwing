@@ -1,13 +1,13 @@
 use syn::{Ident, Type, Visibility};
 
 pub struct CompositeError {
-    visibility: Visibility,
-    name: Ident,
-    variants: Vec<Variant>,
-    composed: Vec<Type>,
+    pub visibility: Visibility,
+    pub name: Ident,
+    pub variants: Vec<Variant>,
+    pub composed: Vec<Type>,
 }
 
 pub struct Variant {
-    subtype: Type,
-    name: Ident,
+    pub typ: Type,
+    pub name: Ident,
 }
