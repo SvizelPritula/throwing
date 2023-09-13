@@ -1,5 +1,4 @@
 /// Reads the current session id on Linux
-
 use std::{fs, io, num::ParseIntError, string::FromUtf8Error};
 
 use throwing::throws;
@@ -19,6 +18,7 @@ fn get_session_id() -> u64 {
 fn main() {
     match get_session_id() {
         Ok(id) => println!("{id}"),
+
         Err(GetSessionIdError::FromUtf8Error(_)) => eprintln!("File has invalid UTF-8"),
         Err(GetSessionIdError::ParseIntError(e)) => eprintln!("File contains invalid integer: {e}"),
         Err(GetSessionIdError::IoError(e)) => eprintln!("Failed to read file: {e}"),

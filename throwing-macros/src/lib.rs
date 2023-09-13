@@ -1,3 +1,8 @@
+//! This crate contains the implementation of macros for the `throwing` crate.
+//!
+//! The recommended way to use these macros is through the main crate,
+//! since it's required for the macros to function anyway.
+
 use attributes::{DefineErrorArgs, ThrowsArgs, VariantArg, VariantArgs};
 use codegen::{error_definition, patch_function};
 use names::{fn_name_to_error, type_to_variant};
