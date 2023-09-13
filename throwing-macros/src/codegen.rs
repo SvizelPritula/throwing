@@ -28,6 +28,7 @@ fn impl_from_variant(error: &CompositeError, variant: &Variant) -> TokenStream {
     let Variant { typ, name } = variant;
 
     quote!(
+        #[automatically_derived]
         impl ::core::convert::From<#typ> for #error_name {
             fn from(value: #typ) -> #error_name {
                 #error_name::#name(value)
@@ -40,6 +41,7 @@ fn impl_from_composed(error: &CompositeError, typ: &Type) -> TokenStream {
     let error_name = &error.name;
 
     quote!(
+        #[automatically_derived]
         impl ::core::convert::From<#typ> for #error_name {
             fn from(value: #typ) -> #error_name {
                 ::throwing::SubError::to_super_error(value)
@@ -60,6 +62,7 @@ fn impl_sub_error(error: &CompositeError) -> TokenStream {
     );
 
     quote!(
+        #[automatically_derived]
         impl<T> ::throwing::SubError<T> for #name where T: #(#froms)+* {
             fn to_super_error(self) -> T {
                 match self {
@@ -88,6 +91,7 @@ fn impl_display(error: &CompositeError) -> TokenStream {
     };
 
     quote!(
+        #[automatically_derived]
         impl ::core::fmt::Display for #name {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 #body
@@ -114,6 +118,7 @@ fn impl_error(error: &CompositeError) -> TokenStream {
     };
 
     quote!(
+        #[automatically_derived]
         impl ::std::error::Error for #name {
             fn source(&self) -> ::core::option::Option<&(dyn ::std::error::Error + 'static)> {
                 #body
