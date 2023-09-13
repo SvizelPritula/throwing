@@ -73,16 +73,24 @@ fn impl_sub_error(error: &CompositeError) -> TokenStream {
 fn impl_display(error: &CompositeError) -> TokenStream {
     let CompositeError { name, variants, .. } = error;
 
-    let arms = variants
-        .iter()
-        .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::fmt::Display::fmt(e, f)));
+    let body = if variants.is_empty() {
+        quote!(match *self {})
+    } else {
+        let arms = variants
+            .iter()
+            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::fmt::Display::fmt(e, f)));
+
+        quote!(
+            match self {
+                #(#arms),*
+            }
+        )
+    };
 
     quote!(
         impl ::std::fmt::Display for #name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-                match self {
-                    #(#arms),*
-                }
+                #body
             }
         }
     )
@@ -91,16 +99,24 @@ fn impl_display(error: &CompositeError) -> TokenStream {
 fn impl_error(error: &CompositeError) -> TokenStream {
     let CompositeError { name, variants, .. } = error;
 
-    let arms = variants
-        .iter()
-        .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::option::Option::Some(e)));
+    let body = if variants.is_empty() {
+        quote!(match *self {})
+    } else {
+        let arms = variants
+            .iter()
+            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::option::Option::Some(e)));
+
+        quote!(
+            match self {
+                #(#arms),*
+            }
+        )
+    };
 
     quote!(
         impl ::std::error::Error for #name {
             fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
-                match self {
-                    #(#arms),*
-                }
+                #body
             }
         }
     )
