@@ -16,6 +16,7 @@ fn error_enum(error: &CompositeError) -> TokenStream {
         .map(|Variant { name, typ }| quote!(#name(#typ)));
 
     quote!(
+        #[derive(::std::fmt::Debug)]
         #visibility enum #name {
             #(#variants),*
         }
@@ -54,13 +55,49 @@ fn impl_sub_error(error: &CompositeError) -> TokenStream {
         .iter()
         .map(|Variant { typ, .. }| quote!(::std::convert::From<#typ>));
 
-    let arms = variants
-        .iter()
-        .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => T::from(e)));
+    let arms = variants.iter().map(
+        |Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::convert::From::from(e)),
+    );
 
     quote!(
         impl<T> ::throwing::SubError<T> for #name where T: #(#froms)+* {
             fn to_super_error(self) -> T {
+                match self {
+                    #(#arms),*
+                }
+            }
+        }
+    )
+}
+
+fn impl_display(error: &CompositeError) -> TokenStream {
+    let CompositeError { name, variants, .. } = error;
+
+    let arms = variants
+        .iter()
+        .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::fmt::Display::fmt(e, f)));
+
+    quote!(
+        impl ::std::fmt::Display for #name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                match self {
+                    #(#arms),*
+                }
+            }
+        }
+    )
+}
+
+fn impl_error(error: &CompositeError) -> TokenStream {
+    let CompositeError { name, variants, .. } = error;
+
+    let arms = variants
+        .iter()
+        .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::option::Option::Some(e)));
+
+    quote!(
+        impl ::std::error::Error for #name {
+            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
                 match self {
                     #(#arms),*
                 }
@@ -81,6 +118,8 @@ pub fn error_definition(error: CompositeError) -> TokenStream {
     }
 
     stream.extend(impl_sub_error(&error));
+    stream.extend(impl_display(&error));
+    stream.extend(impl_error(&error));
 
     stream
 }
