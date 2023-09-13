@@ -1,3 +1,5 @@
+/// Reads the current session id on Linux
+
 use std::{fs, io, num::ParseIntError, string::FromUtf8Error};
 
 use throwing::throws;
