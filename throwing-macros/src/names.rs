@@ -1,4 +1,5 @@
-use syn::{spanned::Spanned, Ident, Path, Type};
+use proc_macro2::Span;
+use syn::{Ident, Path, Type};
 
 pub fn type_to_variant(typ: &Type) -> Option<Ident> {
     match typ {
@@ -16,10 +17,6 @@ pub fn type_to_variant(typ: &Type) -> Option<Ident> {
 }
 
 fn path_to_variant(path: &Path) -> Ident {
-    if path.segments.len() == 1 {
-        return path.segments[0].ident.clone();
-    }
-
     let mut name = String::new();
 
     for segment in &path.segments {
@@ -33,7 +30,7 @@ fn path_to_variant(path: &Path) -> Ident {
         name.extend(chars);
     }
 
-    Ident::new(&name, path.span())
+    Ident::new(&name, Span::mixed_site())
 }
 
 pub fn fn_name_to_error(ident: &Ident) -> Ident {
@@ -54,5 +51,5 @@ pub fn fn_name_to_error(ident: &Ident) -> Ident {
 
     name.push_str("Error");
 
-    Ident::new(&name, ident.span())
+    Ident::new(&name, Span::mixed_site())
 }
