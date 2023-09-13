@@ -41,7 +41,7 @@ fn main() {
     Ok(())
 }
 
-// To make simple errors line this easily, use thiserror.
+// A simple error like this can be conveniently created with thiserror
 
 #[derive(Debug, Clone, Copy)]
 pub struct BadLengthError;

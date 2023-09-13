@@ -16,7 +16,7 @@ fn error_enum(error: &CompositeError) -> TokenStream {
         .map(|Variant { name, typ }| quote!(#name(#typ)));
 
     quote!(
-        #[derive(::std::fmt::Debug)]
+        #[derive(::core::fmt::Debug)]
         #visibility enum #name {
             #(#variants),*
         }
@@ -28,7 +28,7 @@ fn impl_from_variant(error: &CompositeError, variant: &Variant) -> TokenStream {
     let Variant { typ, name } = variant;
 
     quote!(
-        impl ::std::convert::From<#typ> for #error_name {
+        impl ::core::convert::From<#typ> for #error_name {
             fn from(value: #typ) -> #error_name {
                 #error_name::#name(value)
             }
@@ -40,7 +40,7 @@ fn impl_from_composed(error: &CompositeError, typ: &Type) -> TokenStream {
     let error_name = &error.name;
 
     quote!(
-        impl ::std::convert::From<#typ> for #error_name {
+        impl ::core::convert::From<#typ> for #error_name {
             fn from(value: #typ) -> #error_name {
                 ::throwing::SubError::to_super_error(value)
             }
@@ -53,10 +53,10 @@ fn impl_sub_error(error: &CompositeError) -> TokenStream {
 
     let froms = variants
         .iter()
-        .map(|Variant { typ, .. }| quote!(::std::convert::From<#typ>));
+        .map(|Variant { typ, .. }| quote!(::core::convert::From<#typ>));
 
     let arms = variants.iter().map(
-        |Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::convert::From::from(e)),
+        |Variant { name: variant, .. }| quote!(#name::#variant(e) => ::core::convert::From::from(e)),
     );
 
     quote!(
@@ -78,7 +78,7 @@ fn impl_display(error: &CompositeError) -> TokenStream {
     } else {
         let arms = variants
             .iter()
-            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::fmt::Display::fmt(e, f)));
+            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::core::fmt::Display::fmt(e, f)));
 
         quote!(
             match self {
@@ -88,8 +88,8 @@ fn impl_display(error: &CompositeError) -> TokenStream {
     };
 
     quote!(
-        impl ::std::fmt::Display for #name {
-            fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        impl ::core::fmt::Display for #name {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 #body
             }
         }
@@ -104,7 +104,7 @@ fn impl_error(error: &CompositeError) -> TokenStream {
     } else {
         let arms = variants
             .iter()
-            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::std::option::Option::Some(e)));
+            .map(|Variant { name: variant, .. }| quote!(#name::#variant(e) => ::core::option::Option::Some(e)));
 
         quote!(
             match self {
@@ -115,7 +115,7 @@ fn impl_error(error: &CompositeError) -> TokenStream {
 
     quote!(
         impl ::std::error::Error for #name {
-            fn source(&self) -> ::std::option::Option<&(dyn ::std::error::Error + 'static)> {
+            fn source(&self) -> ::core::option::Option<&(dyn ::std::error::Error + 'static)> {
                 #body
             }
         }
@@ -146,7 +146,7 @@ fn wrap_return_with_result(ret: ReturnType, error: Ident) -> ReturnType {
         ReturnType::Type(arrow, typ) => (arrow, *typ),
     };
 
-    let typ = parse_quote!(::std::result::Result<#typ, #error>);
+    let typ = parse_quote!(::core::result::Result<#typ, #error>);
 
     ReturnType::Type(arrow, Box::new(typ))
 }
