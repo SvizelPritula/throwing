@@ -37,6 +37,23 @@ use std::{error::Error, fmt::Display};
 /// // Defines a error crate-wide error
 /// define_error!(pub(crate) type CrateWideError = io::Error);
 /// ```
+/// 
+/// ```
+/// # use std::{num::ParseIntError, str::FromStr};
+/// # use throwing::define_error;
+/// pub struct Id(u64);
+/// 
+/// define_error!(pub type ParseIdError = ParseIntError);
+/// 
+/// impl FromStr for Id {
+///     type Err = ParseIdError;
+///     
+///     fn from_str(s: &str) -> Result<Self, Self::Err> {
+///         let value = s.parse()?;
+///         Ok(value)
+///     }
+/// }
+/// ```
 pub use throwing_macros::define_error;
 
 /// Creates a new composite error type for a function to return.
