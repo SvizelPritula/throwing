@@ -141,7 +141,7 @@ pub use throwing_macros::define_error;
 /// # Syntax
 ///
 /// The main body of the attribute macros arguments consists of a list of types,
-/// seperated by `|` characters.
+/// separated by `|` characters.
 /// They can either be variants, which have just a type name,
 /// or suberrors, which are prefixed with the `break` keyword.
 /// For example, `#[throws(FooError | break BarError)]` declares a variant `FooError`
