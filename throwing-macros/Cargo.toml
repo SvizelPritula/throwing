@@ -1,6 +1,13 @@
 [package]
 name = "throwing-macros"
 version = "0.1.0"
+authors = ["Benjamin Swart <Benjaminswart@email.cz>"]
+categories = ["rust-patterns"]
+description = "Create explicit errors easily with a handy macro"
+documentation = "https://docs.rs/throwing/"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/SvizelPritula/throwing"
+rust-version = "1.65"
 edition = "2021"
 
 [lib]
