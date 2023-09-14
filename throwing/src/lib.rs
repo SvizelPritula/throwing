@@ -225,7 +225,7 @@ pub use throwing_macros::throws;
 
 /// Represents an error that can be upcasted to a different error type.
 /// 
-/// If type `A` implements type `B`, that means that `B` contains all
+/// If type `A` implements `SubError<B>`, that means that `B` contains all
 /// variants that `A` has, and as such `A` can be converted to `B`.
 /// 
 /// This trait powers the [`#[throws]`][throws] and [`define_error!()`] macros.
