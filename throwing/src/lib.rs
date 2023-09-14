@@ -1,3 +1,19 @@
+//! This crate implements a [`#[throws(...)]`][throws] macro that allows you to easily
+//! declare what errors a function can return.
+//! This will allow you to exhaustively match on all possible errors.
+//! It is inspired by [declared exceptions][java-throws] in Java.
+//! 
+//! The [`#[throws(...)]`][throws] macro will automatically generate an enum that can
+//! represent all declared errors, generate [`From<T>`] implementations for
+//! each variant, and change the return type of the function to
+//! an appropriate [`Result<T, E>`].
+//! The error type will also have implementations of [`Error`], [`Display`] and [`Debug`].
+//! 
+//! Additionally, it can generate [`From<T>`] implementation for upcasting errors,
+//! that is converting an error type with fewer variants to one with more variants.
+//! 
+//! [java-throws]: https://docs.oracle.com/javase/tutorial/essential/exceptions/declaring.html
+
 #[cfg(doc)]
 use std::{error::Error, fmt::Display};
 
@@ -216,5 +232,6 @@ pub use throwing_macros::throws;
 /// It's implemented by all error types they generate and required for suberrors
 /// declared with the `break` keyword.
 pub trait SubError<T> {
+    /// Upcasts this error to a super type.
     fn to_super_error(self) -> T;
 }
