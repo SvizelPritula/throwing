@@ -122,7 +122,7 @@ pub use throwing_macros::define_error;
 /// Doing so will generate a [`From<T>`] implementation that upcasts the suberror
 /// into the error type returned by the function.
 /// (Hence "breaking" its variants apart.)
-/// To do this, it's variants have to be a subset of the errors the function
+/// To do this, its variants have to be a subset of the errors the function
 /// can return.
 ///
 /// Suppose you have two functions:
